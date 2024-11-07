@@ -1,0 +1,152 @@
+<!-- Now it works. The options are showing. But when I arrive on question 4 and select an option, nothing happens-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Y2K Style Quiz</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css">
+    <script src="https://unpkg.com/lucide@0.26.3"></script>
+  </head>
+  <body>
+    <div class="w-full max-w-lg mx-auto bg-white rounded-lg shadow-md p-6 my-8" id="y2k-quiz">
+      <h3 class="text-2xl font-bold text-center mb-6">Find Your Y2K Jewelry Style!</h3>
+      
+      <div class="space-y-6">
+        <p class="text-lg font-medium mb-4" id="question"></p>
+        <div class="space-y-3" id="options"></div>
+        <div class="mt-4 text-center text-sm text-gray-500" id="progress"></div>
+      </div>
+      
+      <div class="text-center space-y-6" id="result" style="display: none;">
+        <div class="flex justify-center" id="icon"></div>
+        <h4 class="text-xl font-bold" id="style-title"></h4>
+        <p class="text-gray-600" id="style-description"></p>
+        
+        <div class="mt-4">
+          <h5 class="font-bold mb-2">Perfect Pieces for You:</h5>
+          <ul class="list-none space-y-2" id="recommendations"></ul>
+        </div>
+        
+        <button
+          onclick="resetQuiz()"
+          class="mt-6 px-6 py-2 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition-colors duration-200"
+        >
+          Take Quiz Again
+        </button>
+      </div>
+    </div>
+
+    <script>
+      function renderLucideIcon(name, props) {
+        const icon = lucide[name];
+        if (icon) {
+          return icon({ ...props });
+        } else {
+          console.error(`Lucide icon "${name}" not found.`);
+          return null;
+        }
+      }
+
+      const questions = [
+        {
+          question: "What was your favorite pop star in the 2000s?",
+          options: ["Britney Spears", "Christina Aguilera", "Destiny's Child", "Pink"]
+        },
+        {
+          question: "Pick your ideal weekend outfit:",
+          options: ["Crop top & cargo pants", "Velour tracksuit", "Platform sandals & mini skirt", "Graphic tee & flared jeans"]
+        },
+        {
+          question: "Choose your favorite color combo:",
+          options: ["Pink & Purple", "Silver & Blue", "Black & Gold", "Rainbow Everything"]
+        },
+        {
+          question: "Select your perfect accessory material:",
+          options: ["Plastic & Glitter", "Metallic & Chrome", "Pearls & Crystals", "Mixed Materials"]
+        }
+      ];
+
+      const styles = {
+        "Y2K Princess": {
+          icon: { name: "Crown", props: { class: "w-8 h-8 text-pink-500" } },
+          description: "You're all about the glam! Butterfly necklaces, pink crystals, and lots of sparkle are your go-to pieces.",
+          recommendations: ["Butterfly chokers", "Crystal hair clips", "Chunky rings"]
+        },
+        "Millennium Rebel": {
+          icon: { name: "Star", props: { class: "w-8 h-8 text-purple-500" } },
+          description: "You rock the edgier side of Y2K. Think chrome chains, dark colors, and statement pieces.",
+          recommendations: ["Chain chokers", "Metallic cuffs", "Spiked accessories"]
+        },
+        "Pop Princess": {
+          icon: { name: "Heart", props: { class: "w-8 h-8 text-red-500" } },
+          description: "Sweet, colorful, and fun define your style. Beaded jewelry and playful pieces are your thing.",
+          recommendations: ["Beaded necklaces", "Charm bracelets", "Colorful rings"]
+        },
+        "Y2K Minimalist": {
+          icon: { name: "Sparkles", props: { class: "w-8 h-8 text-blue-500" } },
+          description: "You prefer subtle Y2K touches. Simple chokers and delicate pieces with a 2000s twist.",
+          recommendations: ["Simple chokers", "Thin chain necklaces", "Small butterfly accents"]
+        }
+      };
+
+      let currentQuestion = 0;
+      let answers = [];
+      let showResult = false;
+
+      function calculateStyle() {
+        const stylePoints = answers.reduce((acc, curr) => {
+          if (curr === 0 || curr === 1) return "Y2K Princess";
+          if (curr === 2) return "Millennium Rebel";
+          if (curr === 3) return "Pop Princess";
+          return "Y2K Minimalist";
+        }, "Y2K Princess");
+        
+        return styles[stylePoints];
+      }
+
+      function handleAnswer(index) {
+        answers.push(index);
+        
+        if (currentQuestion < questions.length - 1) {
+          currentQuestion++;
+          updateUI();
+        } else {
+          showResult = true;
+          updateUI();
+        }
+      }
+
+      function resetQuiz() {
+        currentQuestion = 0;
+        answers = [];
+        showResult = false;
+        updateUI();
+      }
+
+      function updateUI() {
+        if (!showResult) {
+          document.getElementById("question").textContent = questions[currentQuestion].question;
+          document.getElementById("options").innerHTML = questions[currentQuestion].options.map((option, index) => `
+            <button
+              onclick="handleAnswer(${index})"
+              class="w-full p-3 text-left rounded-md bg-gray-50 hover:bg-pink-50 transition-colors duration-200"
+            >
+              ${option}
+            </button>
+          `).join("");
+          document.getElementById("progress").textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+          document.getElementById("result").style.display = "none";
+        } else {
+          const style = calculateStyle();
+          const iconElement = renderLucideIcon(style.icon.name, style.icon.props);
+          document.getElementById("icon").innerHTML = iconElement ? iconElement.outerHTML : "";
+          document.getElementById("style-title").textContent = Object.keys(styles).find(key => styles[key] === style);
+          document.getElementById("style-description").textContent = style.description;
+          document.getElementById("recommendations").innerHTML = style.recommendations.map(item => `<li class="text-gray-600">${item}</li>`).join("");
+          document.getElementById("result").style.display = "block";
+        }
+      }
+
+      updateUI();
+    </script>
+  </body>
+</html>
